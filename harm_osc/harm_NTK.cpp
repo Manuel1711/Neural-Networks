@@ -13,6 +13,11 @@ namespace fs = std::filesystem;
 using namespace arma;
 typedef cx_double complex;
 
+int TOT_MAX = 2100;
+int BOOT_MAX = 2100; // TOT_MAX
+
+
+
 inline complex mathT(const complex a, const complex b, const complex c, const complex d) {
     complex a1 = abs(a);
     complex d1 = abs(d);
@@ -102,24 +107,20 @@ outputNTK distribNTKgp(
 }
 
 
-int main() {
+void train_and_test_data(int& time_max, int& num_samples, cx_dmat& input_train, cx_dmat& out_train, cx_dvec& input_test, cx_dvec& out_test){
 
-    const int tot_max = 2100;
-    const int boot_max = 1100; // tot_max
-
-    const int time_max = 200;
-    const int num_samples = 100;
+    time_max = 200;
+    num_samples = 100;
     const int Ntotdata = 300;
 
-    cx_dmat input(tot_max, time_max);
-    cx_dmat output(tot_max, num_samples);
+    cx_dmat input(TOT_MAX, time_max);
+    cx_dmat output(TOT_MAX, num_samples);
 
     fs::path folderPath = "fakedata";
 
     // Check if the folder exists
     if (!fs::is_directory(folderPath)) {
         std::cerr << "The folder does not exist." << std::endl;
-        return 1;
     }
 
     int index(0);
@@ -154,21 +155,94 @@ int main() {
         }
     }
 
-    int num_train = boot_max - 2;
-    int num_test = boot_max - 1; // boot_max - 1
+    int num_train = BOOT_MAX - 2;
+    int num_test = BOOT_MAX - 1; // BOOT_MAX - 1
 
-    cx_dmat input_train(num_train, time_max);
-    cx_dvec input_test(time_max);
+    input_train.resize(num_train, time_max);
+    input_test.resize(time_max);
 
-    cx_dmat out_train(num_train, num_samples);
-    cx_dvec out_test(num_samples);
+    out_train.resize(num_train, num_samples);
+    out_test.resize(num_samples);
 
     input_train = input.submat(0, 0, num_train, time_max-1);
-
     input_test = (input.row(num_test)).t();
 
     out_train = output.submat(0, 0, num_train, num_samples-1);
     out_test = (output.row(num_test)).t();
+
+}
+
+void harm_oscill(int& time_max, int& num_samples, cx_dvec& input_test, cx_dvec& out_test){
+    dvec boot, time, corr;
+
+    std::ifstream inputFile("bootstrap/bootstrap_primofile.dat");
+
+    if (!inputFile.is_open()) {
+        std::cerr << "Failed to open the input file." << std::endl;
+    }
+
+    std::string line;
+    while (std::getline(inputFile, line)) {
+        // Check if the line starts with '#', indicating a comment
+        if (line.empty() || line[0] == '#') {
+            continue; // Skip comments
+        }
+
+        std::istringstream iss(line);
+
+        double val1, val2, val3;
+
+        while (iss >> val1 >> val2 >> val3) {
+            boot.resize(boot.n_elem + 1);
+            time.resize(time.n_elem + 1);
+            corr.resize(corr.n_elem + 1);
+
+            boot(boot.n_elem - 1) = val1;
+            time(time.n_elem - 1) = val2;
+            corr(corr.n_elem - 1) = val3;
+        }
+    }
+    inputFile.close();
+
+    time_max = int(max(time) + 1);
+    int harm_boot_max = int(max(boot));
+
+    //int num_train = harm_boot_max - 1;
+
+/*******IMPORTANT:choice_of_boot_data************/
+    int num_test = 1;//harm_boot_max - 1;
+/*******IMPORTANT:choice_of_boot_data************/
+
+    cx_dmat input(harm_boot_max, time_max);
+    for(int i=0; i<harm_boot_max; ++i){
+        int auxind = i*time_max;
+        for(int jj=0; jj<time_max; ++jj)
+            input(i, jj) = corr(jj + auxind);
+    }
+
+    input_test = (input.row(num_test)).t();
+//std::cout << input_test << '\n';
+    num_samples = 100;
+    double etaharm(0.05), smear_sigma(0.1);
+    dvec int_x = linspace(0, 20, num_samples);
+
+    dvec pdf = (1.0 / (smear_sigma * sqrt(2.0 * datum::pi))) * exp(-0.5 * square((int_x - etaharm) / smear_sigma));
+
+    for(int ii=0; ii<num_samples; ++ii)
+        out_test(ii) = complex(pdf(ii), 0.);
+}
+
+
+int main() {
+
+    int time_max, num_samples;
+
+    cx_dmat input_train, out_train;
+    cx_dvec input_test, out_test;
+
+    train_and_test_data(time_max, num_samples, input_train, out_train, input_test, out_test);
+
+    harm_oscill(time_max, num_samples, input_test, out_test);
 
     // Define your parameter values
     double sigma_b = 1.0;
