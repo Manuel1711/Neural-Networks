@@ -7,5 +7,5 @@ boot.out: bootstrap.cpp
 	#./boot.out  -icorrelazioni_primofile.txt -otemp.dat
 	#sort -k1 -k2 -n temp.dat > bootstrap_primofile.dat
 
-ntk.out: harm_NTK.cpp
-	$(CC) harm_NTK.cpp -ontk.out -larmadillo -llapack -lblas
+ntk.out: main.cpp include/
+	$(CC) main.cpp -ontk.out -larmadillo -llapack -lblas
