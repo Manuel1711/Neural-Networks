@@ -6,8 +6,8 @@
 void train_and_test_data(int& time_max, int& num_samples, cx_dmat& input_train, cx_dmat& out_train, cx_dvec& input_test, cx_dvec& out_test){
 
     time_max = 200;
-    num_samples = 100;
-    const int Ntotdata = 300;
+    num_samples = 10000;
+    const int Ntotdata = time_max + num_samples;
 
     cx_dmat input(TOT_MAX, time_max);
     cx_dmat output(TOT_MAX, num_samples);
@@ -51,7 +51,7 @@ void train_and_test_data(int& time_max, int& num_samples, cx_dmat& input_train, 
         }
     }
 
-    int num_train = BOOT_MAX - 2;
+    int num_train = BOOT_MAX - 1;
     int num_test = BOOT_MAX - 1; // BOOT_MAX - 1
 
     input_train.resize(num_train, time_max);
