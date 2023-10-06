@@ -3,10 +3,10 @@
 
 #include "global_var.h"
 
-void harm_oscill(int& time_max, int& num_samples, cx_dvec& input_test, cx_dvec& out_test){
+void harm_oscill(const int num_test, int& time_max, int& num_samples, cx_dvec& input_test, cx_dvec& out_test){
     dvec boot, time, corr;
 
-    std::ifstream inputFile("bootstrap/bootstrap_primofile.dat");
+    std::ifstream inputFile("bootstrap/bootstrap1k_secondofile.dat");
 
     if (!inputFile.is_open()) {
         std::cerr << "Failed to open the input file." << std::endl;
@@ -41,7 +41,7 @@ void harm_oscill(int& time_max, int& num_samples, cx_dvec& input_test, cx_dvec& 
     //int num_train = harm_boot_max - 1;
 
 /*******IMPORTANT:choice_of_boot_data************/
-    int num_test = 20;//harm_boot_max - 1;
+    //int num_test = 0;//harm_boot_max - 1;
 /*******IMPORTANT:choice_of_boot_data************/
 
     cx_dmat input(harm_boot_max, time_max);
@@ -53,15 +53,17 @@ void harm_oscill(int& time_max, int& num_samples, cx_dvec& input_test, cx_dvec& 
 
     input_test = (input.row(num_test)).t();
 //std::cout << input_test << '\n';
-    num_samples = 10000;
-    double etaharm(0.05), smear_sigma(0.005);
+    //num_samples = 10000;
+    double etaharm(0.05), smear_sigma(0.01);
     dvec int_x = linspace(0, 0.3, num_samples);
 
-    dvec pdf = std::pow(2., -1./2.)*(1.0 / (smear_sigma * sqrt(2.0 * datum::pi))) * exp(-0.5 * square((int_x - etaharm) / smear_sigma));
+    double aux_zeta = 0.5 + 0.5*erf(etaharm/sqrt(2)/smear_sigma);
 
-    //dvec pdf = std::pow(2., -3./2.)*(1.0 / (smear_sigma * sqrt(2.0 * datum::pi))) * exp(-0.5 * square((int_x - etaharm) / smear_sigma));
+    //dvec pdf = std::pow(2., -1./2.)*(1.0 / (aux_zeta * smear_sigma * sqrt(2.0 * datum::pi))) * exp(-0.5 * square((int_x - etaharm) / smear_sigma));
 
-    //pdf = pdf + std::pow(2., -3./2.)/9.*(1.0 / (smear_sigma * sqrt(2.0 * datum::pi))) * exp(-0.5 * square((int_x - 3*etaharm) / smear_sigma));
+    dvec pdf = std::pow(2., -3./2.)*(1.0 / (aux_zeta * smear_sigma * sqrt(2.0 * datum::pi))) * exp(-0.5 * square((int_x - etaharm) / smear_sigma));
+
+    pdf = pdf + std::pow(2., -3./2.)/9.*(1.0 / (aux_zeta * smear_sigma * sqrt(2.0 * datum::pi))) * exp(-0.5 * square((int_x - 3*etaharm) / smear_sigma));
 
     for(int ii=0; ii<num_samples; ++ii)
         out_test(ii) = complex(pdf(ii), 0.);

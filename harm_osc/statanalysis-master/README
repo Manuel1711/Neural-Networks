@@ -1,0 +1,53 @@
+*********************************
+*** PYTHON3 PACKAGE FOR BASIC ***
+*** STATISTICAL DATA ANALYSIS ***
+*********************************
+
+All the scripts have a __main__ for unit testing or explanations that can be
+used as an example of use.
+
+blocksum.py       : to block data when there is autocorrelation
+
+bootstrap.py      : bootstrap computation of average values 
+                   (both primary and secondary observables)
+
+concatenate.py    : to remove thermalization and concatenate files
+
+make_integer.py   : find the best rescaling factor to make vector components 
+                    almost integer numbers
+
+integrator.py     : to numerically integrate a function defined on datapoints 
+
+jackknife.py      : jackknife computation of average values 
+                    (both primary and secondary observables)
+
+multihistogram.py : an implementation of the multiple histogram reweighting
+                    method
+
+progressbar.py    : to display a progress bar
+
+regression.py     : for nonlinear fitting
+
+*********************************
+
+If the folder "statanalysis" is saved in the working area one can use the
+following lines to add it to the pythonpath:
+
+import sys
+import os
+
+try:
+  with open("statanalysis/jackknife.py") as f: 
+    pass
+except:
+  print("Get the package 'statanalysis' from")
+  print("https://github.com/claudio-bonati/statanalysis")
+  print("and put it in this directory.")
+  print()
+  print("If you have 'git' installed you can use")
+  print("git clone https://github.com/claudio-bonati/statanalysis")
+  print()
+  sys.exit(1)
+
+sys.path.append(os.getcwd()+"/statanalysis")
+

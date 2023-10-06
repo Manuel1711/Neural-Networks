@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 	}
 
     // Define the number of bootstraps
-    int numBootstraps = 100;
+    int numBootstraps = 1000;
 
     // Read the dataset from the file into memory
     // std::cout << in_string << std::endl;
