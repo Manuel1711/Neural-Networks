@@ -1,8 +1,15 @@
+#define ACT_RELU
 #include "include/all.h"
 
 int main() {
 
-    TOT_MAX = 2005;
+    //TOT_MAX = 101;
+    //BOOT_MAX = TOT_MAX;
+
+    fs::path folderPath = "fakedata";
+    fs::path stringInput = "data/corr.txt";
+
+    TOT_MAX = count_filefolder(folderPath);
     BOOT_MAX = TOT_MAX;
 
     int num_test(0), time_max, num_samples;
@@ -10,9 +17,9 @@ int main() {
     cx_dmat input_train, out_train;
     cx_dvec input_test, out_test;
 
-    train_and_test_data(time_max, num_samples, input_train, out_train, input_test, out_test);
+    train_and_test_data(time_max, num_samples, input_train, out_train, input_test, out_test, folderPath);
 
-    harm_oscill(num_test, time_max, num_samples, input_test, out_test);
+    harm_oscill(num_test, time_max, num_samples, input_test, out_test, stringInput);
 
     // Define your parameter values
     double sigma_b = 10.0;
@@ -23,27 +30,32 @@ int main() {
 
     char foutput[80];
 
-    std::sprintf(foutput, "data.dat");
+    std::sprintf(foutput, "data_m.dat");
 
     FILE * net;
     net = fopen(foutput , "wt");
 
-    std::sprintf(foutput, "test.dat");
+    std::sprintf(foutput, "test_m.dat");
     FILE * test;
     test = fopen(foutput, "wt");
 
-    int max_boot_harm = 10;
+    std::cout << "END DATA COLLECTION\n";
+
+/*
+    int max_boot_harm = 2;
     cx_dvec mean_out_test = zeros<cx_dvec>(out_test.n_elem), err_out_test = zeros<cx_dvec>(out_test.n_elem);
 //std::cout << "sdasda\n";
     for (num_test=0; num_test < max_boot_harm; ++num_test)
         {
         harm_oscill(num_test, time_max, num_samples, input_test, out_test);
 //std::cout << "sdas5555da\n";
-        outputNTK result = distribNTKgp(input_test, input_train, out_train, eta, n_layer, sigma_w, sigma_b, n0);
+        //outputNTK result = distribNTKgp(input_test, input_train, out_train, eta, n_layer, sigma_w, sigma_b, n0);
+        outputNTK result = distribNNGP(input_test, input_train, out_train, eta, n_layer, sigma_w, sigma_b, n0);
         mean_out_test += result.mean;
+        //std::cout << result.variance << "\n";
         err_out_test += square(result.mean);
         }
-    //outputNTK result = distribNNGP(input_test, input_train, out_train, eta, n_layer, sigma_w, sigma_b, n0);
+
     mean_out_test = mean_out_test / double(max_boot_harm);
     err_out_test = sqrt((err_out_test- double(max_boot_harm)*square(mean_out_test))/ (double(max_boot_harm)-1));
 
@@ -52,17 +64,23 @@ int main() {
         fprintf(net, "%.9e		%.9e        %.9e\n", int_x(i), real(mean_out_test(i)), real(err_out_test(i)));
         fprintf(test, "%.9e		%.9e\n", int_x(i), real(out_test(i)));
     }
+*/
 
 
-    /*
     outputNTK result = distribNTKgp(input_test, input_train, out_train, eta, n_layer, sigma_w, sigma_b, n0);
 
-    dvec int_x = linspace(0, 0.3, num_samples);
+    //outputNTK result = distribNNGP(input_test, input_train, out_train, eta, n_layer, sigma_w, sigma_b, n0);
+
+    //dvec int_x = linspace(0, 0.3, num_samples);
+    dvec int_x = linspace(0.0, 2.5, num_samples);
+    //dvec int_x = linspace(0.1, 0.2, num_samples/3);
+
     for(int i=0; i<num_samples; ++i){
+    //for(int i=0; i<num_samples/3; ++i){
         fprintf(net, "%.9e		%.9e\n", int_x(i), real(result.mean(i)));
         fprintf(test, "%.9e		%.9e\n", int_x(i), real(out_test(i)));
     }
-    */
+
 
     return 0;
 

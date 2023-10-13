@@ -20,6 +20,7 @@ using namespace arma;
 typedef cx_double complex;
 
 #include "global_var.h"
+#include "count_filefolder.hpp"
 
 #include "distributions.hpp" 
 #include "harm_osc.hpp"

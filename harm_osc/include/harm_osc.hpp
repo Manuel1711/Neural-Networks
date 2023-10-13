@@ -3,10 +3,11 @@
 
 #include "global_var.h"
 
-void harm_oscill(const int num_test, int& time_max, int& num_samples, cx_dvec& input_test, cx_dvec& out_test){
+void harm_oscill(const int num_test, int& time_max, int& num_samples, cx_dvec& input_test, cx_dvec& out_test, const fs::path stringInput){
     dvec boot, time, corr;
 
-    std::ifstream inputFile("bootstrap/bootstrap1k_secondofile.dat");
+    //std::ifstream inputFile("bootstrap/bootstrap1k_secondofile.dat");
+    std::ifstream inputFile(stringInput);
 
     if (!inputFile.is_open()) {
         std::cerr << "Failed to open the input file." << std::endl;
@@ -55,7 +56,9 @@ void harm_oscill(const int num_test, int& time_max, int& num_samples, cx_dvec& i
 //std::cout << input_test << '\n';
     //num_samples = 10000;
     double etaharm(0.05), smear_sigma(0.01);
-    dvec int_x = linspace(0, 0.3, num_samples);
+    //dvec int_x = linspace(0, 0.3, num_samples);
+    dvec int_x = linspace(0.0, 2.5, num_samples);
+    //dvec int_x = linspace(0.1, 0.2, num_samples/3);
 
     double aux_zeta = 0.5 + 0.5*erf(etaharm/sqrt(2)/smear_sigma);
 
@@ -66,6 +69,7 @@ void harm_oscill(const int num_test, int& time_max, int& num_samples, cx_dvec& i
     pdf = pdf + std::pow(2., -3./2.)/9.*(1.0 / (aux_zeta * smear_sigma * sqrt(2.0 * datum::pi))) * exp(-0.5 * square((int_x - 3*etaharm) / smear_sigma));
 
     for(int ii=0; ii<num_samples; ++ii)
+    //for(int ii=0; ii<num_samples/3; ++ii)
         out_test(ii) = complex(pdf(ii), 0.);
 }
 
