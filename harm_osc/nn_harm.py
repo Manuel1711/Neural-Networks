@@ -25,10 +25,7 @@ testData = "bootstrap/bootstrap1k_mean_secondofile.dat"#"data/corr.txt"
 
 start_index = testData.find('/')
 end_index = testData.find('.dat')
-
 name_out = testData[start_index + 1:end_index]
-print(name_out)
-exit()
 
 data_files = glob(pattern)
 
@@ -233,14 +230,14 @@ with torch.no_grad():
 
 
 #xjj, yjj = np.loadtxt("data/spectrum_smeared1.txt", unpack="True")
-output_file_path = f"output-train{tot_max}-test{testData}.dat"
+output_file_path = f"output-train{tot_max}-test{name_out}.dat"
 
 # Open the file in write mode ('w')
 # This will create a new file if it doesn't exist or overwrite the file if it does exist
 with open(output_file_path, 'w') as output_file:
     # Write data to the file
     for i, elem in enumerate(out_net):
-        output_file.write("{x[i]}       {out_net[i]}\n")
+        output_file.write(f"{x[i]}       {out_net[i]}\n")
 
 
 #print(out_net, len(input_test))
@@ -249,7 +246,7 @@ plt.plot(x, out_net)
 #plt.xlim([0,10])
 #plt.plot(x, out_test)
 #plt.plot(xjj, yjj)#out_test)
-plt.savefig(f"out_plot_on_{testData}.pdf", format = 'pdf')
+plt.savefig(f"out_plot_on_{name_out}.pdf", format = 'pdf')
 
 
 # In[ ]:
