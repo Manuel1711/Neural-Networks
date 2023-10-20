@@ -23,6 +23,13 @@ from glob import glob
 pattern = "fakedata/*.txt*"
 testData = "bootstrap/bootstrap1k_mean_secondofile.dat"#"data/corr.txt"
 
+start_index = testData.find('/')
+end_index = testData.find('.dat')
+
+name_out = testData[start_index + 1:end_index]
+print(name_out)
+exit()
+
 data_files = glob(pattern)
 
 #random.shuffle(data_files)
