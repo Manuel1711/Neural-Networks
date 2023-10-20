@@ -226,7 +226,7 @@ with torch.no_grad():
 
 
 #xjj, yjj = np.loadtxt("data/spectrum_smeared1.txt", unpack="True")
-output_file_path = "output-train{tot_max}-test{testData}.dat"
+output_file_path = f"output-train{tot_max}-test{testData}.dat"
 
 # Open the file in write mode ('w')
 # This will create a new file if it doesn't exist or overwrite the file if it does exist
@@ -242,7 +242,7 @@ plt.plot(x, out_net)
 #plt.xlim([0,10])
 #plt.plot(x, out_test)
 #plt.plot(xjj, yjj)#out_test)
-plt.savefig("out_plot_on_{testData}.pdf", format = 'pdf')
+plt.savefig(f"out_plot_on_{testData}.pdf", format = 'pdf')
 
 
 # In[ ]:
