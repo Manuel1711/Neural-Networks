@@ -7,7 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <glob.h>
-
+#include <omp.h>
 #include <armadillo>
 
 #include <filesystem>

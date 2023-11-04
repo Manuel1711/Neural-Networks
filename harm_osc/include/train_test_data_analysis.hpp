@@ -27,7 +27,7 @@ void train_and_test_data(int& time_max, int& num_samples, cx_dmat& input_train, 
         if (entry.is_regular_file()) {
 
             std::ifstream file(entry.path());
-            //std::cout << entry.path() << '\n';
+//std::cout << entry.path() << '\n';
             // Check if the file can be opened
             if (!file.is_open()) {
                 std::cerr << "Failed to open file: " << entry.path() << std::endl;

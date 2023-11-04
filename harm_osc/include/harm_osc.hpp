@@ -56,8 +56,8 @@ void harm_oscill(const int num_test, int& time_max, int& num_samples, cx_dvec& i
 //std::cout << input_test << '\n';
     //num_samples = 10000;
     double etaharm(0.05), smear_sigma(0.01);
-    //dvec int_x = linspace(0, 0.3, num_samples);
-    dvec int_x = linspace(0.0, 2.5, num_samples);
+    dvec int_x = linspace(0, 0.2, num_samples);
+    //dvec int_x = linspace(0.0, 2.5, num_samples);
     //dvec int_x = linspace(0.1, 0.2, num_samples/3);
 
     double aux_zeta = 0.5 + 0.5*erf(etaharm/sqrt(2)/smear_sigma);

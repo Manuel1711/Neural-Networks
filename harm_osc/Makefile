@@ -8,4 +8,7 @@ boot.out: bootstrap.cpp
 	#sort -k1 -k2 -n temp.dat > bootstrap_primofile.dat
 
 ntk.out: main.cpp include/
-	$(CC) main.cpp -ontk.out -larmadillo -llapack -lblas
+	$(CC) main.cpp -ontk.out -larmadillo -llapack -lblas -fopenmp
+
+cr_data.out: Data_Func.C
+	$(CC) Data_Func.C -ocr_data.out 
