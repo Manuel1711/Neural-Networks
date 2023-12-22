@@ -22,13 +22,13 @@ def rho(omega, mu1, mu2, mu3, sigma1, sigma2, sigma3, a1, a2, a3):
     gaussian1 = a1 * np.exp(-((omega - mu1) / sigma1)**2) / (sigma1 * np.sqrt(2 * np.pi))
     gaussian2 = a2 * np.exp(-((omega - mu2) / sigma2)**2) / (sigma2 * np.sqrt(2 * np.pi))
     gaussian3 = a3 * np.exp(-((omega - mu3) / sigma3)**2) / (sigma3 * np.sqrt(2 * np.pi))
-    return gaussian1
+    return gaussian1 + gaussian2 + gaussian3
 
 # Numero di funzioni rho casuali da generare
-num_random_rho = 100#100000
+num_random_rho = 10000#100000
 
 # Valori di tau di interesse da 0 a 199
-tau_values = range(200)
+tau_values = range(100)
 
 # Numero di sottoplot per riga
 num_subplot_per_row = 8
@@ -45,7 +45,7 @@ parametri_rho = np.zeros((num_random_rho, 9))  # 9 parametri: mu1, mu2, mu3, sig
 for i in range(num_random_rho):
     #print(i)
     # Genera valori casuali per i parametri della funzione rho
-    mu1 = i/num_random_rho
+    mu1 = np.random.uniform(0, 1) #i/num_random_rho
     mu2 = np.random.uniform(0, 1)
     mu3 = np.random.uniform(0, 1)
     #sigma1 = np.random.uniform(0, 0.1)
@@ -54,16 +54,16 @@ for i in range(num_random_rho):
     sigma1=0.01
     sigma2=0.01
     sigma3=0.01
-    a1 = np.random.uniform(0.1, 1.0)
-    a2 = np.random.uniform(0.1, 1.0)
-    a3 = np.random.uniform(0.1, 1.0)
+    a1 = np.random.uniform(0.01, 1.0)
+    a2 = np.random.uniform(0.01, 1.0)
+    a3 = np.random.uniform(0.01, 1.0)
 
     # Memorizza i parametri nella matrice parametri_rho
     parametri_rho[i] = [mu1, mu2, mu3, sigma1, sigma2, sigma3, a1, a2, a3]
     
     for j, tau in enumerate(tau_values):
         # Calcola l'integrale del correlatore per la funzione rho corrente e il valore di tau corrente
-        C_integral = correlation(tau, 200, lambda omega: rho(omega, mu1, mu2, mu3, sigma1, sigma2, sigma3, a1, a2, a3))
+        C_integral = correlation(tau, 100, lambda omega: rho(omega, mu1, mu2, mu3, sigma1, sigma2, sigma3, a1, a2, a3))
         
         # Assegna il risultato all'array bidimensionale
         correlation_integrals[j, i] = C_integral
@@ -71,18 +71,6 @@ for i in range(num_random_rho):
 
 
 # Grafica gli istogrammi degli integrali dei correlatori per diversi valori di tau
-plt.figure(figsize=(16, 12))
-for i in range(len(tau_values)):
-    plt.subplot(num_rows, num_subplot_per_row, i + 1)
-    plt.hist(correlation_integrals[i], bins=20, edgecolor='k')
-    plt.xlabel('Integrale del Correlatore', fontsize=8)
-    plt.ylabel('Frequenza', fontsize=8)
-    plt.title(f'Tau = {tau_values[i]}', fontsize=10)
-    plt.grid(True)
-
-plt.tight_layout()
-plt.show()
-
 
 # In[23]:
 
@@ -104,11 +92,11 @@ plt.show()
 for i in range(num_random_rho):
 
     correlation_values = correlation_integrals[:, i]
-    omega_values = np.linspace(0, 1, 1000)
+    omega_values = np.linspace(0, 0.2, 10000)
     mu1, mu2, mu3, sigma1, sigma2, sigma3, a1, a2, a3 = parametri_rho[i]
 
     # Apri il file per la scrittura
-    fileop = f'fdata/Data_{i}_1_reg.txt'
+    fileop = f'fakedata2/data0_{i}_mu3_om02.txt'
     with open(fileop, 'w') as file:
         # Scrivi i primi 100 valori di correlazione
         for value in correlation_values:

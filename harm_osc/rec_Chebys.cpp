@@ -7,7 +7,7 @@
 using namespace arma;
 using namespace boost::math;
 
-double a(0), b(1); // Estremi dell'intervallo
+double a(1), b(10); // Estremi dell'intervallo
 
 double approximatedFunction(const dvec& coefficients, double xvar, int N) {
     double result = 0.0;
@@ -21,8 +21,8 @@ double approximatedFunction(const dvec& coefficients, double xvar, int N) {
 }
 
 int main() {
-    int N = 30; // Grado massimo della scomposizione
-    double x = 0.2; // Punto in cui calcolare f(x)
+    int N = 50; // Grado massimo della scomposizione
+    double x; // Punto in cui calcolare f(x)
 
     dvec coefficients(N + 1); // Coefficienti a_n
 
@@ -35,10 +35,12 @@ int main() {
 		++ iiv;
 	}
 
-    double result = approximatedFunction(coefficients, x, N);
+	for(int i=1; i < 11; ++i){
+        x = double(i);
+        double result = approximatedFunction(coefficients, x, N);
 
-    std::cout << "f(" << x << ") = " << result << std::endl;
-
+        std::cout << "f(" << x << ") = " << result << std::endl;
+    }
 	input_file.close();
     return 0;
 }

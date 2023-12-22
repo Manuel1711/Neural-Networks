@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[405]:
+# In[61]:
 
 
 import numpy as np
@@ -17,15 +17,10 @@ from glob import glob
 
 # ## FakeData
 
-# In[406]:
+# In[62]:
 
 
 pattern = "fakedata/*.txt*"
-testData = "bootstrap/bootstrap1k_mean_secondofile.dat"#"data/corr.txt"
-
-start_index = testData.find('/')
-end_index = testData.find('.dat')
-name_out = testData[start_index + 1:end_index]
 
 data_files = glob(pattern)
 
@@ -48,10 +43,9 @@ for ind in range(0,tot_max):
     x_temp = np.loadtxt(data_files[ind], unpack=True)
     input[ind] = x_temp[0:time_max]
     output[ind] = x_temp[Ntotdata-num_samples:]
-
-#print(len(output[boot_max-1]), boot_max)
     
-num_train = boot_max - 2
+    
+num_train = boot_max - 1
 num_test = boot_max - 1 # boot_max - 1
 
 input_train = input[0:num_train,:]
@@ -61,14 +55,16 @@ input_test = input[num_test,:]
 out_train = output[0:num_train,:]
 out_test = output[num_test,:]
 
+print(boot_max, tot_max)
+
 
 # ## Harmonic oscillator
 
-# In[413]:
+# In[63]:
 
 
-#boot, time, corr = np.loadtxt("bootstrap/bootstrap1k_mean_secondofile.dat", unpack=True)
-boot, time, corr = np.loadtxt(testData, unpack=True)
+boot, time, corr = np.loadtxt("bootstrap/bootstrap1k_secondofile.dat", unpack=True)
+#boot, time, corr = np.loadtxt("data/corr.txt", unpack=True)
 
 
 time_max = int(np.max(time) + 1)
@@ -88,7 +84,7 @@ input_test = input[num_test,:]
 #print(input_test)
     
 num_samples = 10000
-x = np.linspace(0, 2.5, num_samples)
+x = np.linspace(0, 0.3, num_samples)
 etaharm = 0.05
 smear_sigma = 0.01
 
@@ -109,17 +105,17 @@ pdf2 = 1./2.**(3./2.)/aux_zeta*( norm.pdf(x, loc = etaharm, scale = smear_sigma)
 
 # #### Parameters
 
-# In[414]:
+# In[182]:
 
 
-hid_size = 32
-hid_size2 = 32
-learning_rate = 0.5
+hid_size = 128
+hid_size2 = 128
+learning_rate = 0.002
 
 
 # #### Net
 
-# In[415]:
+# In[ ]:
 
 
 class netNeur(nn.Module):
@@ -141,9 +137,9 @@ class netNeur(nn.Module):
         x=self.layer1(x)
         x=self.activation1(x)
         x=self.layer2(x)
+        x=self.activation1(x)
+        x=self.layer3(x)
         x=self.activation2(x)
-        #x=self.layer3(x)
-        #x=self.activation2(x)
         x=self.layer4(x)
         #x=self.activation2(x)
         return x
@@ -159,9 +155,9 @@ dstep = int((num_train-1)/n_discr + 1)
 
 optimizer = torch.optim.Adam(rete.parameters(), lr=learning_rate)
 #optimizer = torch.optim.SGD(rete.parameters(), lr=learning_rate)
-scheduler = lr_scheduler.StepLR(optimizer, step_size=500, gamma=0.1)
+scheduler = lr_scheduler.StepLR(optimizer, step_size=800, gamma=0.1)
 
-for j in range(1):
+for j in range(4):
     #for i in range(0,n_discr):
     for i in tqdm(range(n_discr), desc="Progress", ncols=100):
         #optimizer = torch.optim.Adam(rete.parameters(), lr=0.01)
@@ -202,57 +198,75 @@ for j in range(1):
         #rete.zero_grad()
 
 
-# In[416]:
+# In[ ]:
 
 
-#plt.plot(losses)
+plt.plot(losses)
 
 
-# In[411]:
+# In[ ]:
 
 
-#print(len(input_train[0,:]), len(input_test))
+print(f"boot_max = {boot_max}")
+
+mean_out_test = torch.tensor(np.zeros(len(out_test)))
+err_out_test = torch.tensor(np.zeros(len(out_test)))
 
 #n_discr = num_test
 #dstep = int((num_test-1)/n_discr + 1)
-in_test = torch.tensor(input_test)
+#boot_max = 4
+for test_num in range(boot_max):
+    #input_train = input[0:num_train,:]
+    input_test = input[test_num,:]
+    in_test = torch.tensor(input_test)
 
-rete.eval()
+    rete.eval()
 
-with torch.no_grad():
-    out_net = rete(in_test)
+    with torch.no_grad():
+        out_net = rete(in_test)
 
+    mean_out_test += out_net
+    err_out_test += torch.square(out_net)
 
+mean_out_test = mean_out_test / float(boot_max)
+err_out_test = torch.sqrt((err_out_test- float(boot_max)*torch.square(mean_out_test))/ (float(boot_max)-1.))
 #out_net = distribNTKgp(input_test, input_train, out_train, eta, n_layer, sigma_w, sigma_b, n0)
 
+print(err_out_test)
 
-# In[417]:
+
+# In[ ]:
 
 
 #xjj, yjj = np.loadtxt("data/spectrum_smeared1.txt", unpack="True")
-output_file_path = f"output-train{tot_max}-test{name_out}.dat"
+
+#print(out_net, len(input_test))
+#plt.xlim(0,0.3)
+selected_indices = np.arange(0, len(x), 10)
+selected_x = x[selected_indices]
+selected_mean = mean_out_test[selected_indices]
+selected_errors = err_out_test[selected_indices]
+
+#plt.plot(x, out_net)
+#plt.plot(x, mean_out_test)
+plt.errorbar(selected_x, selected_mean, yerr=selected_errors, fmt='.', markersize=3, capsize=1, elinewidth=1)
+#plt.xlim([0,10])
+plt.plot(x, pdf2)
+#plt.plot(xjj, yjj)#out_test)
+plt.show()
+
+
+# In[ ]:
+
+
+output_file_path = f"outputNNwidth256sec.dat"
 
 # Open the file in write mode ('w')
 # This will create a new file if it doesn't exist or overwrite the file if it does exist
 with open(output_file_path, 'w') as output_file:
     # Write data to the file
     for i, elem in enumerate(out_net):
-        output_file.write(f"{x[i]}       {out_net[i]}\n")
-
-
-#print(out_net, len(input_test))
-plt.xlim(0,2.50)
-plt.plot(x, out_net)
-#plt.xlim([0,10])
-#plt.plot(x, out_test)
-#plt.plot(xjj, yjj)#out_test)
-plt.savefig(f"out_plot_on_{name_out}.pdf", format = 'pdf')
-
-
-# In[ ]:
-
-
-
+        output_file.write(f"{x[i]} \t\t {mean_out_test[i]} \t \t {err_out_test[i]}\n")
 
 
 # In[ ]:
